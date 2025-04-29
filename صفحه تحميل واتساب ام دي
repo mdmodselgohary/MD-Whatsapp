@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title></title>  </title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100vw; height: 100vh;
+      font-family: 'Cairo', sans-serif;
+      background-color: #e9f5f9;
+      overflow: hidden;
+    }
+
+    #start-screen {
+      position: absolute;
+      width: 100vw; height: 100vh;
+      background: #fff;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center; z-index: 1000;
+      padding: 20px;
+    }
+
+    #start-screen img {
+      width: 150px; height: 150px;
+      border-radius: 50%; margin-bottom: 20px;
+      border: 4px solid #4CAF50;
+    }
+
+    #start-screen button {
+      margin-top: 20px;
+      padding: 14px 28px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white; border: none;
+      border-radius: 30px; cursor: pointer;
+    }
+
+    #game-container {
+      width: 100vw; height: 100vh;
+      position: relative;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #head {
+      width: 100px; height: 100px;
+      border-radius: 50%; object-fit: cover;
+      position: absolute; cursor: pointer;
+      border: 4px solid #4CAF50;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 2;
+    }
+
+    #head-ring {
+      width: 120px; height: 120px;
+      border-radius: 50%; position: absolute;
+      z-index: 1;
+    }
+
+    .info-panel {
+      position: absolute; top: 10px;
+      display: flex; justify-content: space-between;
+      width: 90%; padding: 10px 20px;
+    }
+
+    .info-box {
+      background: #fff;
+      font-size: 18px; font-weight: bold;
+      padding: 10px 20px; border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    #control-buttons {
+      position: absolute; bottom: 30px;
+      display: flex; flex-direction: column;
+      gap: 10px; align-items: center;
+    }
+
+    .button-group {
+      display: flex; gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 30px;
+      background-color: #2196F3;
+      color: white;
+      cursor: pointer;
+    }
+
+    #restart-btn {
+      display: none;
+      background-color: #4CAF50;
+    }
+
+    #upload-input, #bg-input {
+      display: none;
+    }
+
+    #coins-display {
+      position: absolute; top: 10px; left: 20px;
+      font-size: 18px;
+      background: #fff;
+      padding: 8px 16px;
+      border-radius: 12px;
+      color: #444;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="start-screen">
+    <img src="https://blogger.googleusercontent.com/img/a/AVvXsEifNmbBI-fWD_gTY3SLABDU4wLqta8fc1__H90rCl_-Yk7vl7R6v8ygfYdpoL7ytieKyfm2ol0dOCTq4n64EWUqfT0bbdr_caitaRhVu2Fd7UgtTH5zVbfYHg2cyppK04-YXrJsFqtcpbd_WnToe14ad1rRfpxQq1Xyd0pqjF9_K97DyuhVvSbHyU8_z-9T=s431" alt="شعار اللعبة">
+    <h2>مرحبًا بك في لعبة اصطياد الرأس!</h2>
+    <p>اضغط على الرأس المتحرك للحصول على نقاط! حقق 10 نقاط لتنتقل للجولة التالية.</p>
+    <button onclick="startGame()">ابدأ اللعب!</button>
+  </div>
+
+  <div id="game-container">
+    <div id="coins-display">نقاطك: <span id="coins-count">0</span></div>
+    <div class="info-panel">
+      <div id="score" class="info-box">النقاط: 0</div>
+      <div id="round" class="info-box">الجولة: 1</div>
+      <div id="time" class="info-box">الوقت: 20</div>
+    </div>
+
+    <div id="head-ring"></div>
+    <img id="head" src="https://blogger.googleusercontent.com/img/a/AVvXsEifNmbBI-fWD_gTY3SLABDU4wLqta8fc1__H90rCl_-Yk7vl7R6v8ygfYdpoL7ytieKyfm2ol0dOCTq4n64EWUqfT0bbdr_caitaRhVu2Fd7UgtTH5zVbfYHg2cyppK04-YXrJsFqtcpbd_WnToe14ad1rRfpxQq1Xyd0pqjF9_K97DyuhVvSbHyU8_z-9T=s431" alt="الرأس">
+
+    <div id="control-buttons">
+      <div class="button-group">
+        <button id="pause-btn">إيقاف</button>
+        <button id="change-bg-btn">خلفية</button>
+      </div>
+      <div class="button-group">
+        <button id="change-head-btn">الصورة</button>
+        <button id="restart-btn">إعادة اللعب</button>
+      </div>
+    </div>
+
+    <input type="file" id="upload-input" accept="image/*">
+    <input type="file" id="bg-input" accept="image/*">
+
+    <!-- أصوات -->
+    <audio id="click-sound" src="https://www.fesliyanstudios.com/play-mp3/387" preload="auto"></audio>
+    <audio id="clap-sound" src="https://www.fesliyanstudios.com/play-mp3/6670" preload="auto"></audio>
+  </div>
+
+  <script>
+    const head = document.getElementById('head');
+    const headRing = document.getElementById('head-ring');
+    const scoreText = document.getElementById('score');
+    const roundText = document.getElementById('round');
+    const timeText = document.getElementById('time');
+    const coinsText = document.getElementById('coins-count');
+    const uploadInput = document.getElementById('upload-input');
+    const bgInput = document.getElementById('bg-input');
+    const clickSound = document.getElementById('click-sound');
+    const clapSound = document.getElementById('clap-sound');
+
+    let score = 0, round = 1, time = 20, coins = parseInt(localStorage.getItem("coins")) || 0;
+    let moveSpeed = 500;
+    let moveInterval, timer;
+    let isPaused = false;
+
+    coinsText.textContent = coins;
+
+    head.addEventListener('click', () => {
+      if (isPaused) return;
+      clickSound.play();
+      score++;
+      scoreText.textContent = `النقاط: ${score}`;
+      if (score >= 10) nextRound();
+    });
+
+    document.getElementById('pause-btn').onclick = () => {
+      isPaused = !isPaused;
+      document.getElementById('pause-btn').textContent = isPaused ? "تشغيل" : "إيقاف";
+      if (isPaused) {
+        clearInterval(timer);
+        clearInterval(moveInterval);
+      } else {
+        startTimers();
+      }
+    };
+
+    document.getElementById('change-bg-btn').onclick = () => {
+      bgInput.click();
+    };
+
+    bgInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          document.body.style.background = `url('${event.target.result}') no-repeat center center / cover`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('change-head-btn').onclick = () => {
+      uploadInput.click();
+    };
+
+    uploadInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          head.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('restart-btn').onclick = () => {
+      score = 0; round = 1; time = 20; moveSpeed = 500;
+      scoreText.textContent = `النقاط: ${score}`;
+      roundText.textContent = `الجولة: ${round}`;
+      timeText.textContent = `الوقت: ${time}`;
+      document.getElementById('restart-btn').style.display = 'none';
+      startRound();
+    };
+
+    function startGame() {
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('game-container').style.display = 'flex';
+      startRound();
+    }
+
+    function startRound() {
+      moveHead();
+      startTimers();
+    }
+
+    function moveHead() {
+      const x = Math.random() * (window.innerWidth - 120);
+      const y = Math.random() * (window.innerHeight - 120);
+      head.style.left = `${x}px`;
+      head.style.top = `${y}px`;
+      headRing.style.left = `${x - 10}px`;
+      headRing.style.top = `${y - 10}px`;
+    }
+
+    function startTimers() {
+      moveInterval = setInterval(moveHead, moveSpeed);
+      timer = setInterval(() => {
+        time--;
+        timeText.textContent = `الوقت: ${time}`;
+        if (time <= 0) {
+          clearInterval(timer);
+          clearInterval(moveInterval);
+          alert("انتهى الوقت! أعد اللعب.");
+          document.getElementById('restart-btn').style.display = 'block';
+        }
+      }, 1000);
+    }
+
+    function nextRound() {
+      clearInterval(timer);
+      clearInterval(moveInterval);
+      coins += score;
+      localStorage.setItem("coins", coins);
+      coinsText.textContent = coins;
+      clapSound.play();
+      round++;
+      roundText.textContent = `الجولة: ${round}`;
+      score = 0;
+      scoreText.textContent = `النقاط: 0`;
+      time = 20;
+      moveSpeed = Math.max(150, moveSpeed - 50);
+      startRound();
+    }
+  </script>
+</body>
+</html>
